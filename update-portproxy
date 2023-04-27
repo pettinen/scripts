@@ -1,0 +1,16 @@
+#!/bin/bash
+# Example: update-portproxy 80 443
+
+set -o errexit -o pipefail
+
+addr=$(ip --json addr show dev eth0 | jq -r '.[0].addr_info[]|select(.family == "inet").local')
+
+commands='netsh interface portproxy reset'
+
+for port in "$@"; do
+    commands+="; netsh interface portproxy add v4tov4 $port $addr"
+done
+
+'/c/Program Files/PowerShell/7/pwsh.exe' \
+    -Command "Start-Process powershell \
+        -ArgumentList '-Command $commands' -Verb RunAs -WindowStyle Hidden"

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -o errexit -o pipefail
+
+rm --force /etc/pacman.d/mirrorlist.pacnew
+
+list=$(curl --fail --silent 'https://archlinux.org/mirrorlist/?protocol=https&ip_version=4&use_mirror_status=on')
+list=$(sed -e 's/^#//' -e '/^#/d' <<< $list | rankmirrors -n 5 --parallel -)
+[[ $list ]] && echo "$list" > /etc/pacman.d/mirrorlist
